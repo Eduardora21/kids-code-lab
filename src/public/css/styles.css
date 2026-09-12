@@ -1,0 +1,18 @@
+/* Keyframes para la animación del despegue del cohete */
+@keyframes launch {
+    0% { 
+        transform: translateY(0); 
+    }
+    50% { 
+        transform: translateY(-50px); 
+    }
+    100% { 
+        transform: translateY(-300px); 
+        opacity: 0; 
+    }
+}
+
+/* Clase que activa la animación */
+.rocket-launch {
+    animation: launch 2s forwards ease-in;
+}
