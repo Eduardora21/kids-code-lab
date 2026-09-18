@@ -44,14 +44,52 @@ $niveles = [
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between p-4 md:p-8 font-sans">
 
-    <header class="max-w-6xl mx-auto w-full flex justify-between items-center pb-6 border-b border-slate-800">
-        <div class="flex items-center gap-3">
-            <span class="text-3xl">🎮</span>
-            <h1 class="text-2xl font-extrabold text-yellow-400">KidsCode Lab</h1>
+   <!-- BANNER HERO INTEGRADO -->
+    <header class="max-w-6xl mx-auto w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl border border-indigo-500/30 p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden">
+        
+        <!-- Adornos de fondo / luces resplandecientes -->
+        <div class="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Barra Superior del Header -->
+        <div class="flex justify-between items-center pb-6 border-b border-slate-700/50 relative z-10">
+            <div class="flex items-center gap-3">
+                <div class="bg-yellow-400 text-slate-950 p-2.5 rounded-2xl shadow-lg shadow-yellow-400/20 text-2xl font-bold">
+                    🚀
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-white tracking-wide">
+                        KidsCode <span class="text-yellow-400">Lab</span>
+                    </h1>
+                    <span class="text-xs text-indigo-300 font-medium">Plataforma Interactiva</span>
+                </div>
+            </div>
+
+            <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm">
+                🕹️ Panel Principal
+            </span>
         </div>
-        <div class="bg-indigo-900/60 px-4 py-1.5 rounded-full border border-indigo-700/50 text-sm font-medium text-indigo-200">
-            Selección de Bloques
+
+        <!-- Titular / Bienvenida dentro del Hero -->
+        <div class="pt-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">
+                    ¡Elige tu Misión de Código! 👋
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base max-w-xl">
+                    Selecciona uno de los bloques de aprendizaje para dominar conceptos clave de lógica y programación mientras juegas.
+                </p>
+            </div>
+            
+            <div class="flex-shrink-0 bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex items-center gap-4 shadow-inner">
+                <div class="text-3xl">🏆</div>
+                <div>
+                    <div class="text-xs text-slate-400 font-semibold uppercase">Progreso Global</div>
+                    <div class="text-sm font-bold text-yellow-400">3 Módulos Disponibles</div>
+                </div>
+            </div>
         </div>
+
     </header>
 
     <main class="max-w-6xl mx-auto w-full my-8">
