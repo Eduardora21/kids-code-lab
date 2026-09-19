@@ -1,39 +1,65 @@
 <?php
 
-namespace KidsCodeLab;
-
-class Leccion {
+class Leccion
+{
     private int $id;
     private string $titulo;
-    private string $modulo;
+    private string $descripcion;
+    private string $dificultad;
+    private int $pasos;
     private string $icono;
-    private string $descripcionServicio;
-    private string $objetivo;
-    private int $pasosRequeridos;
+    private int $xp;
 
     public function __construct(
         int $id,
         string $titulo,
-        string $modulo,
+        string $descripcion,
+        string $dificultad,
+        int $pasos,
         string $icono,
-        string $descripcionServicio,
-        string $objetivo,
-        int $pasosRequeridos = 3
+        int $xp
     ) {
         $this->id = $id;
         $this->titulo = $titulo;
-        $this->modulo = $modulo;
+        $this->descripcion = $descripcion;
+        $this->dificultad = $dificultad;
+        $this->pasos = $pasos;
         $this->icono = $icono;
-        $this->descripcionServicio = $descripcionServicio;
-        $this->objetivo = $objetivo;
-        $this->pasosRequeridos = $pasosRequeridos;
+        $this->xp = $xp;
     }
 
-    public function getId(): int { return $this->id; }
-    public function getTitulo(): string { return $this->titulo; }
-    public function getModulo(): string { return $this->modulo; }
-    public function getIcono(): string { return $this->icono; }
-    public function getDescripcionServicio(): string { return $this->descripcionServicio; }
-    public function getObjetivo(): string { return $this->objetivo; }
-    public function getPasosRequeridos(): int { return $this->pasosRequeridos; }
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getTitulo(): string
+    {
+        return $this->titulo;
+    }
+
+    public function getDescripcion(): string
+    {
+        return $this->descripcion;
+    }
+
+    public function getDificultad(): string
+    {
+        return $this->dificultad;
+    }
+
+    public function getPasos(): int
+    {
+        return $this->pasos;
+    }
+
+    public function getIcono(): string
+    {
+        return $this->icono;
+    }
+
+    public function getXp(): int
+    {
+        return $this->xp;
+    }
 }

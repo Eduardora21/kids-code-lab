@@ -1,150 +1,562 @@
 <?php
+
+// Cargamos la clase que representa las lecciones.
 require_once __DIR__ . '/classes/Leccion.php';
 
-use KidsCodeLab\Leccion;
+// Todos los niveles se obtienen desde un único archivo de configuración.
+// Más adelante esta información vendrá desde la base de datos.
+$nivelesConfig = require __DIR__ . '/config/niveles.php';
 
-$niveles = [
-    new Leccion(
-        1,
-        'El Cohete Espacial',
-        'Módulo 1: Lógica Secuencial',
-        '🚀',
-        'Sirve para aprender la importancia del orden en que se ejecutan los comandos.',
-        'Organizar las 3 instrucciones de despegue en la secuencia correcta.',
-        3
-    ),
-    new Leccion(
-        2,
-        'El Robot Explorador',
-        'Módulo 2: Bucles y Repeticiones',
-        '🤖',
-        'Sirve para entender cómo repetir acciones automáticamente sin repetir código.',
-        'Programar al robot para que avance colectando gemas usando bucles.',
-        3
-    ),
-    new Leccion(
-        3,
-        'La Puerta Secreta',
-        'Módulo 3: Condicionales (Si / Sino)',
-        '🔑',
-        'Sirve para que la computadora aprenda a tomar decisiones según el entorno.',
-        'Usar la llave correcta para decidir si la puerta del castillo se abre.',
-        1
-    )
-];
+$lecciones = [];
+
+// Convertimos la configuración de cada nivel en objetos Leccion.
+// Esto nos permite trabajar con los datos de una manera más ordenada.
+foreach ($nivelesConfig as $nivel) {
+    $lecciones[] = new Leccion(
+        $nivel['id'],
+        $nivel['titulo'],
+        $nivel['descripcion'],
+        $nivel['dificultad'],
+        $nivel['pasos'],
+        $nivel['icono'],
+        $nivel['xp']
+    );
+}
+
+// Por ahora el progreso es temporal.
+// Cuando tengamos usuarios y base de datos, estos valores serán dinámicos.
+$nivelActual = 1;
+$xpActual = 0;
+$xpSiguienteNivel = 300;
+
+// Calculamos el porcentaje para mostrarlo en la barra de progreso.
+$porcentajeProgreso = ($xpActual / $xpSiguienteNivel) * 100;
+
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KidsCode Lab - Dashboard</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>KidsCode Lab | Aventuras de programación</title>
+
+    <!--
+        Tailwind nos permite construir rápidamente la interfaz.
+        Más adelante podemos compilarlo localmente si queremos preparar
+        el proyecto para producción.
+    -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Estilos propios del proyecto -->
     <link rel="stylesheet" href="public/css/styles.css">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between p-4 md:p-8 font-sans">
 
-   <!-- BANNER HERO INTEGRADO -->
-    <header class="max-w-6xl mx-auto w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl border border-indigo-500/30 p-6 md:p-8 mb-8 shadow-2xl relative overflow-hidden">
-        
-        <!-- Adornos de fondo / luces resplandecientes -->
-        <div class="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<body class="min-h-screen bg-slate-50 text-slate-800">
 
-        <!-- Barra Superior del Header -->
-        <div class="flex justify-between items-center pb-6 border-b border-slate-700/50 relative z-10">
-            <div class="flex items-center gap-3">
-                <div class="bg-yellow-400 text-slate-950 p-2.5 rounded-2xl shadow-lg shadow-yellow-400/20 text-2xl font-bold">
-                    🚀
+    <!-- ======================================================
+         ENCABEZADO
+         ====================================================== -->
+
+    <header class="bg-white border-b border-slate-200">
+
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
+            <!-- Logo / nombre de la plataforma -->
+            <a href="dashboard.php" class="flex items-center gap-3">
+
+                <div
+                    class="w-11 h-11 rounded-2xl bg-indigo-600
+                           flex items-center justify-center text-2xl
+                           shadow-sm"
+                >
+                    💻
                 </div>
+
                 <div>
-                    <h1 class="text-2xl font-black text-white tracking-wide">
-                        KidsCode <span class="text-yellow-400">Lab</span>
+                    <h1 class="text-xl font-black text-slate-900 leading-tight">
+                        KidsCode Lab
                     </h1>
-                    <span class="text-xs text-indigo-300 font-medium">Plataforma Interactiva</span>
+
+                    <p class="text-xs text-slate-500">
+                        Aprende jugando
+                    </p>
                 </div>
+
+            </a>
+
+            <!--
+                Este perfil es solamente visual por ahora.
+                Cuando implementemos autenticación mostrará
+                los datos del niño que inició sesión.
+            -->
+            <div class="flex items-center gap-3">
+
+                <div class="hidden sm:block text-right">
+
+                    <p class="text-sm font-bold">
+                        Explorador
+                    </p>
+
+                    <p class="text-xs text-slate-500">
+                        Nivel <?= $nivelActual ?>
+                    </p>
+
+                </div>
+
+                <div
+                    class="w-11 h-11 rounded-full bg-amber-100
+                           flex items-center justify-center text-2xl
+                           border-2 border-amber-300"
+                >
+                    🧑‍🚀
+                </div>
+
             </div>
 
-            <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm">
-                🕹️ Panel Principal
-            </span>
-        </div>
-
-        <!-- Titular / Bienvenida dentro del Hero -->
-        <div class="pt-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-            <div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">
-                    ¡Elige tu Misión de Código! 👋
-                </h2>
-                <p class="text-slate-300 text-sm md:text-base max-w-xl">
-                    Selecciona uno de los bloques de aprendizaje para dominar conceptos clave de lógica y programación mientras juegas.
-                </p>
-            </div>
-            
-            <div class="flex-shrink-0 bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex items-center gap-4 shadow-inner">
-                <div class="text-3xl">🏆</div>
-                <div>
-                    <div class="text-xs text-slate-400 font-semibold uppercase">Progreso Global</div>
-                    <div class="text-sm font-bold text-yellow-400">3 Módulos Disponibles</div>
-                </div>
-            </div>
         </div>
 
     </header>
 
-    <main class="max-w-6xl mx-auto w-full my-8">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-white mb-2">¡Elige tu Misión de Código! 👋</h2>
-            <p class="text-slate-400">Selecciona un bloque para aprender conceptos clave de programación jugando.</p>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <?php foreach ($niveles as $nivel): ?>
-                <div class="bg-slate-800/90 rounded-2xl border border-slate-700/70 p-6 flex flex-col justify-between hover:border-yellow-400/50 hover:shadow-2xl hover:-translate-y-1 transition duration-200 group">
+    <main class="max-w-7xl mx-auto px-6 py-10">
+
+        <!-- ==================================================
+             BIENVENIDA
+             ================================================== -->
+
+        <section
+            class="relative overflow-hidden rounded-3xl
+                   bg-gradient-to-r from-indigo-600 to-violet-600
+                   text-white p-8 md:p-10 shadow-lg mb-10"
+        >
+
+            <!-- Elementos decorativos -->
+            <div
+                class="absolute -top-10 -right-10
+                       text-9xl opacity-10 select-none"
+            >
+                🚀
+            </div>
+
+            <div
+                class="absolute -bottom-10 right-32
+                       text-8xl opacity-10 select-none"
+            >
+                👾
+            </div>
+
+
+            <div class="relative max-w-2xl">
+
+                <span
+                    class="inline-flex bg-white/15 border border-white/20
+                           px-4 py-1.5 rounded-full text-sm font-bold mb-4"
+                >
+                    🌱 Mundo 1 · Aventureros del Código
+                </span>
+
+                <h2 class="text-3xl md:text-4xl font-black mb-3">
+                    ¡Tu aventura comienza aquí! 🚀
+                </h2>
+
+                <p class="text-indigo-100 text-lg leading-relaxed">
+                    Resuelve misiones, aprende a programar y conviértete
+                    poco a poco en un verdadero maestro del código.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             PROGRESO DEL JUGADOR
+             ================================================== -->
+
+        <section
+            class="bg-white border border-slate-200
+                   rounded-3xl p-6 shadow-sm mb-10"
+        >
+
+            <div
+                class="flex flex-col md:flex-row md:items-center
+                       md:justify-between gap-5"
+            >
+
+                <div>
+
+                    <p
+                        class="text-xs uppercase tracking-widest
+                               font-bold text-indigo-600 mb-1"
+                    >
+                        Tu progreso
+                    </p>
+
+                    <h3 class="text-xl font-black text-slate-900">
+                        Explorador de Código
+                    </h3>
+
+                </div>
+
+
+                <!-- Estadísticas rápidas -->
+                <div class="flex gap-6">
+
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-4xl group-hover:scale-110 transition duration-200">
-                                <?php echo $nivel->getIcono(); ?>
-                            </span>
-                            <span class="text-xs font-semibold px-3 py-1 bg-slate-900/80 text-yellow-400 rounded-full border border-slate-700">
-                                Bloque #<?php echo $nivel->getId(); ?>
-                            </span>
-                        </div>
-
-                        <h3 class="text-xl font-bold text-white mb-1">
-                            <?php echo $nivel->getTitulo(); ?>
-                        </h3>
-                        <p class="text-xs text-indigo-300 font-medium mb-4">
-                            <?php echo $nivel->getModulo(); ?>
+                        <p class="text-xs text-slate-500">
+                            Experiencia
                         </p>
 
-                        <div class="mb-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                            <span class="text-xs font-bold text-cyan-400 uppercase tracking-wide block mb-1">💡 ¿Para qué sirve?</span>
-                            <p class="text-xs text-slate-300 leading-relaxed">
-                                <?php echo $nivel->getDescripcionServicio(); ?>
-                            </p>
-                        </div>
-
-                        <div class="mb-6 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide block mb-1">🎯 Objetivo de la Misión</span>
-                            <p class="text-xs text-slate-300 leading-relaxed">
-                                <?php echo $nivel->getObjetivo(); ?>
-                            </p>
-                        </div>
+                        <p class="font-black text-lg">
+                            ⭐ <?= $xpActual ?> XP
+                        </p>
                     </div>
 
-                    <a href="index.php?nivel=<?php echo $nivel->getId(); ?>" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-extrabold py-3 rounded-xl text-center shadow-md transition duration-150 flex justify-center items-center gap-2">
-                        <span>Iniciar Nivel</span>
-                        <span>➡️</span>
-                    </a>
+                    <div>
+                        <p class="text-xs text-slate-500">
+                            Misiones
+                        </p>
+
+                        <p class="font-black text-lg">
+                            🎯 0 / <?= count($lecciones) ?>
+                        </p>
+                    </div>
+
                 </div>
-            <?php endforeach; ?>
-        </div>
+
+            </div>
+
+
+            <!-- Barra de experiencia -->
+            <div class="mt-6">
+
+                <div
+                    class="flex justify-between text-sm
+                           font-semibold text-slate-500 mb-2"
+                >
+                    <span>Nivel <?= $nivelActual ?></span>
+
+                    <span>
+                        <?= $xpActual ?> / <?= $xpSiguienteNivel ?> XP
+                    </span>
+                </div>
+
+
+                <div
+                    class="w-full h-3 bg-slate-100
+                           rounded-full overflow-hidden"
+                >
+
+                    <div
+                        class="h-full bg-gradient-to-r
+                               from-indigo-500 to-violet-500
+                               rounded-full transition-all duration-500"
+                        style="width: <?= $porcentajeProgreso ?>%"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             MAPA DE MISIONES
+             ================================================== -->
+
+        <section>
+
+            <div
+                class="flex flex-col sm:flex-row sm:items-end
+                       sm:justify-between gap-3 mb-6"
+            >
+
+                <div>
+
+                    <p
+                        class="text-sm font-bold text-indigo-600
+                               uppercase tracking-wider"
+                    >
+                        Mundo 1
+                    </p>
+
+                    <h2
+                        class="text-2xl md:text-3xl
+                               font-black text-slate-900"
+                    >
+                        🌱 Aventureros del Código
+                    </h2>
+
+                    <p class="text-slate-500 mt-2">
+                        Completa las misiones y descubre cómo piensa
+                        un programador.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="bg-emerald-50 text-emerald-700
+                           px-4 py-2 rounded-xl text-sm font-bold"
+                >
+                    Principiante
+                </div>
+
+            </div>
+
+
+            <!-- Tarjetas de las misiones -->
+            <div
+                class="grid grid-cols-1 md:grid-cols-2
+                       lg:grid-cols-3 gap-6"
+            >
+
+                <?php foreach ($lecciones as $indice => $leccion): ?>
+
+                    <?php
+
+                    /*
+                     * Por ahora dejamos disponible únicamente la primera
+                     * misión para representar cómo funcionará el desbloqueo.
+                     *
+                     * Después este estado dependerá del progreso real
+                     * almacenado para cada usuario.
+                     */
+                    $bloqueado = $indice > 0;
+
+                    ?>
+
+                    <article
+                        class="group relative bg-white border
+                               border-slate-200 rounded-3xl p-6
+                               transition duration-300
+                               <?= $bloqueado
+                                   ? 'opacity-70'
+                                   : 'hover:-translate-y-1 hover:shadow-xl'
+                               ?>"
+                    >
+
+                        <!-- Número de misión -->
+                        <div
+                            class="absolute top-5 right-5
+                                   text-xs font-black text-slate-400"
+                        >
+                            MISIÓN <?= $leccion->getId() ?>
+                        </div>
+
+
+                        <!-- Icono principal -->
+                        <div
+                            class="w-16 h-16 rounded-2xl
+                                   <?= $bloqueado
+                                       ? 'bg-slate-100'
+                                       : 'bg-indigo-50'
+                                   ?>
+                                   flex items-center justify-center
+                                   text-4xl mb-5"
+                        >
+                            <?= htmlspecialchars($leccion->getIcono()) ?>
+                        </div>
+
+
+                        <h3
+                            class="text-xl font-black
+                                   text-slate-900 mb-2"
+                        >
+                            <?= htmlspecialchars($leccion->getTitulo()) ?>
+                        </h3>
+
+
+                        <p
+                            class="text-slate-500 leading-relaxed
+                                   min-h-[72px]"
+                        >
+                            <?= htmlspecialchars(
+                                $leccion->getDescripcion()
+                            ) ?>
+                        </p>
+
+
+                        <!-- Información de la misión -->
+                        <div
+                            class="flex items-center justify-between
+                                   mt-6 pt-5 border-t border-slate-100"
+                        >
+
+                            <div class="flex gap-4 text-sm">
+
+                                <span
+                                    class="text-slate-500"
+                                    title="Cantidad de pasos"
+                                >
+                                    🧩 <?= $leccion->getPasos() ?>
+                                </span>
+
+                                <span
+                                    class="font-bold text-amber-600"
+                                    title="Experiencia que puedes ganar"
+                                >
+                                    ⭐ <?= $leccion->getXp() ?> XP
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Acción de la tarjeta -->
+                        <div class="mt-5">
+
+                            <?php if (!$bloqueado): ?>
+
+                                <a
+                                    href="index.php?nivel=<?= $leccion->getId() ?>"
+                                    class="flex items-center justify-center
+                                           w-full bg-indigo-600
+                                           hover:bg-indigo-700 text-white
+                                           font-black py-3 rounded-xl
+                                           transition"
+                                >
+                                    Jugar misión 🚀
+                                </a>
+
+                            <?php else: ?>
+
+                                <button
+                                    type="button"
+                                    disabled
+                                    class="flex items-center justify-center
+                                           w-full bg-slate-100
+                                           text-slate-400 font-bold
+                                           py-3 rounded-xl cursor-not-allowed"
+                                >
+                                    🔒 Completa la misión anterior
+                                </button>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             PRÓXIMOS MUNDOS
+             ================================================== -->
+
+        <section class="mt-14">
+
+            <h2 class="text-2xl font-black text-slate-900 mb-6">
+                Más aventuras te esperan
+            </h2>
+
+
+            <div class="grid md:grid-cols-2 gap-6">
+
+                <!-- Mundo intermedio -->
+                <div
+                    class="relative overflow-hidden bg-white
+                           border border-slate-200 rounded-3xl
+                           p-7"
+                >
+
+                    <span
+                        class="inline-block text-xs font-black
+                               uppercase tracking-widest
+                               text-amber-600 mb-3"
+                    >
+                        Mundo 2
+                    </span>
+
+                    <h3 class="text-xl font-black mb-2">
+                        ⚡ Maestros del Código
+                    </h3>
+
+                    <p class="text-slate-500">
+                        Nuevos retos aparecerán cuando completes
+                        tu primera aventura.
+                    </p>
+
+                    <div
+                        class="absolute right-6 bottom-4
+                               text-6xl opacity-10"
+                    >
+                        ⚡
+                    </div>
+
+                </div>
+
+
+                <!-- Mundo avanzado -->
+                <div
+                    class="relative overflow-hidden bg-white
+                           border border-slate-200 rounded-3xl
+                           p-7"
+                >
+
+                    <span
+                        class="inline-block text-xs font-black
+                               uppercase tracking-widest
+                               text-rose-600 mb-3"
+                    >
+                        Mundo 3
+                    </span>
+
+                    <h3 class="text-xl font-black mb-2">
+                        🔥 Leyendas del Código
+                    </h3>
+
+                    <p class="text-slate-500">
+                        Demuestra todo lo aprendido en las misiones
+                        más desafiantes de KidsCode Lab.
+                    </p>
+
+                    <div
+                        class="absolute right-6 bottom-4
+                               text-6xl opacity-10"
+                    >
+                        🔥
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
     </main>
 
-    <footer class="max-w-6xl mx-auto w-full border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
-        KidsCode Lab &copy; <?php echo date('Y'); ?> - Sistema Educativo Interactivo
+
+    <!-- ======================================================
+         PIE DE PÁGINA
+         ====================================================== -->
+
+    <footer class="mt-16 border-t border-slate-200 bg-white">
+
+        <div
+            class="max-w-7xl mx-auto px-6 py-7
+                   text-center text-sm text-slate-400"
+        >
+            KidsCode Lab · Aprende, experimenta y crea 🚀
+        </div>
+
     </footer>
 
 </body>
+
 </html>
