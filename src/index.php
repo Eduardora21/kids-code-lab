@@ -9,22 +9,34 @@
 
 require_once __DIR__ . '/classes/Leccion.php';
 
+
 // Cargamos la configuración central de los niveles.
 $nivelesConfig = require __DIR__ . '/config/niveles.php';
 
+// Cargamos los bloques utilizados por cada misión.
+$bloquesPorNivel = require __DIR__ . '/config/bloques.php';
+
+// Cargamos las soluciones esperadas para cada misión.
+$solucionesPorNivel = require __DIR__ . '/config/soluciones.php';
+
+
 $lecciones = [];
+
 
 /*
  * Convertimos cada nivel configurado en un objeto Leccion.
- * De esta forma dashboard.php e index.php utilizan la misma
- * información y evitamos mantener catálogos duplicados.
+ *
+ * Cada objeto recibe toda la información definida en niveles.php,
+ * incluyendo ahora el concepto de programación que enseña.
  */
 foreach ($nivelesConfig as $nivel) {
+
     $lecciones[$nivel['id']] = new Leccion(
         $nivel['id'],
         $nivel['titulo'],
         $nivel['descripcion'],
         $nivel['dificultad'],
+        $nivel['concepto'],
         $nivel['pasos'],
         $nivel['icono'],
         $nivel['xp']
@@ -42,174 +54,29 @@ $idNivel = isset($_GET['nivel'])
     ? (int) $_GET['nivel']
     : 1;
 
+
 // Si el nivel solicitado no existe, mostramos el nivel 1.
 if (!isset($lecciones[$idNivel])) {
     $idNivel = 1;
 }
 
+
 // Lección que se mostrará en pantalla.
 $leccionActual = $lecciones[$idNivel];
-
-
-/*
- * Bloques disponibles para cada misión.
- *
- * Más adelante podremos mover esta configuración fuera de index.php,
- * pero por ahora la mantenemos aquí hasta terminar la reorganización
- * principal del juego.
- */
-$bloquesPorNivel = [
-
-    // ---------------------------------------------------------
-    // NIVEL 1: Lógica secuencial
-    // ---------------------------------------------------------
-    1 => [
-        [
-            'id' => 'paso1',
-            'texto' => '1. ⛽ Cargar Combustible',
-            'tipo' => 'correcto',
-            'color' => 'bg-blue-600 hover:bg-blue-500'
-        ],
-        [
-            'id' => 'paso2',
-            'texto' => '2. 👨‍🚀 Abrochar Cinturón',
-            'tipo' => 'correcto',
-            'color' => 'bg-cyan-600 hover:bg-cyan-500'
-        ],
-        [
-            'id' => 'paso3',
-            'texto' => '3. 🔥 Encender Motores',
-            'tipo' => 'correcto',
-            'color' => 'bg-amber-600 hover:bg-amber-500'
-        ],
-        [
-            'id' => 'paso4',
-            'texto' => '4. 🚀 ¡Iniciar Despegue!',
-            'tipo' => 'correcto',
-            'color' => 'bg-emerald-600 hover:bg-emerald-500'
-        ],
-        [
-            'id' => 'dist1',
-            'texto' => '🍕 Comer una Pizza',
-            'tipo' => 'distractor',
-            'color' => 'bg-rose-700 hover:bg-rose-600'
-        ],
-        [
-            'id' => 'dist2',
-            'texto' => '😴 Tomar una Siesta',
-            'tipo' => 'distractor',
-            'color' => 'bg-indigo-700 hover:bg-indigo-600'
-        ],
-    ],
-
-
-    // ---------------------------------------------------------
-    // NIVEL 2: Bucles y repeticiones
-    // ---------------------------------------------------------
-    2 => [
-        [
-            'id' => 'bucle_inicio',
-            'texto' => '1. 🔁 REPETIR 3 VECES:',
-            'tipo' => 'correcto',
-            'color' => 'bg-purple-600 hover:bg-purple-500'
-        ],
-        [
-            'id' => 'bucle_avanzar',
-            'texto' => '2. ➡️ └─ Avanzar 1 Paso',
-            'tipo' => 'correcto',
-            'color' => 'bg-blue-600 hover:bg-blue-500'
-        ],
-        [
-            'id' => 'bucle_gema',
-            'texto' => '3. 💎 └─ Recolectar Gema',
-            'tipo' => 'correcto',
-            'color' => 'bg-cyan-600 hover:bg-cyan-500'
-        ],
-        [
-            'id' => 'bucle_mochila',
-            'texto' => '4. 🎒 Guardar en Mochila',
-            'tipo' => 'correcto',
-            'color' => 'bg-emerald-600 hover:bg-emerald-500'
-        ],
-        [
-            'id' => 'dist_robot1',
-            'texto' => '🛑 Apagar Robot',
-            'tipo' => 'distractor',
-            'color' => 'bg-slate-600 hover:bg-slate-500'
-        ],
-        [
-            'id' => 'dist_robot2',
-            'texto' => '💃 Bailar Festejo',
-            'tipo' => 'distractor',
-            'color' => 'bg-pink-600 hover:bg-pink-500'
-        ],
-    ],
-
-
-    // ---------------------------------------------------------
-    // NIVEL 3: Condicionales
-    // ---------------------------------------------------------
-    3 => [
-        [
-            'id' => 'if_dorada',
-            'texto' => '🔑 SI (Llave == Dorada)',
-            'tipo' => 'correcto',
-            'color' => 'bg-amber-600 hover:bg-amber-500'
-        ],
-        [
-            'id' => 'then_abrir',
-            'texto' => '🔓 ENTONCES -> Abrir Puerta',
-            'tipo' => 'correcto',
-            'color' => 'bg-emerald-600 hover:bg-emerald-500'
-        ],
-        [
-            'id' => 'if_plateada',
-            'texto' => '🗝️ SI (Llave == Plateada)',
-            'tipo' => 'incorrecto',
-            'color' => 'bg-slate-600 hover:bg-slate-500'
-        ],
-        [
-            'id' => 'then_cerrar',
-            'texto' => '🔒 ENTONCES -> Quedar Cerrado',
-            'tipo' => 'incorrecto',
-            'color' => 'bg-zinc-600 hover:bg-zinc-500'
-        ],
-        [
-            'id' => 'if_dragon',
-            'texto' => '🐉 SI (Llave == Juguete) -> Despertar Dragón',
-            'tipo' => 'distractor',
-            'color' => 'bg-rose-700 hover:bg-rose-600'
-        ],
-        [
-            'id' => 'if_trampa',
-            'texto' => '💣 SI (Llave == Oxidada) -> Activar Trampa',
-            'tipo' => 'distractor',
-            'color' => 'bg-purple-700 hover:bg-purple-600'
-        ],
-    ]
-];
 
 
 // Obtenemos los bloques correspondientes a la misión actual.
 $bloquesActuales = $bloquesPorNivel[$idNivel];
 
+// Obtenemos también la solución correspondiente a la misión actual.
+$solucionActual = $solucionesPorNivel[$idNivel];
+
 // Los bloques aparecen desordenados cada vez que inicia la misión.
 shuffle($bloquesActuales);
 
 
-/*
- * Nombre del concepto que se mostrará en el encabezado.
- *
- * Por ahora depende del nivel. Más adelante podremos añadir
- * este dato directamente a la configuración de niveles.
- */
-$conceptosPorNivel = [
-    1 => 'Lógica Secuencial',
-    2 => 'Bucles y Repeticiones',
-    3 => 'Condicionales (Si / Sino)'
-];
-
-$conceptoActual = $conceptosPorNivel[$idNivel];
+// El concepto ahora pertenece directamente a la misión.
+$conceptoActual = $leccionActual->getConcepto();
 
 ?>
 
@@ -320,6 +187,7 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
                            text-xs
                            shadow-md"
                 >
+
                     <span
                         class="group-hover:-translate-x-1
                                transition-transform"
@@ -328,6 +196,7 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
                     </span>
 
                     <span>MENÚ</span>
+
                 </a>
 
 
@@ -426,11 +295,13 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
                            items-center
                            gap-1"
                 >
+
                     <span>⭐</span>
 
                     <span>
                         NIVEL <?= $leccionActual->getId() ?>
                     </span>
+
                 </div>
 
             </div>
@@ -438,7 +309,6 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
         </div>
 
     </header>
-
 
 
     <!-- =====================================================
@@ -646,7 +516,6 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
         </div>
 
 
-
         <!-- =================================================
              ESCENARIO DE LA MISIÓN
              ================================================= -->
@@ -780,7 +649,6 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
     </main>
 
 
-
     <!-- =====================================================
          PIE DE PÁGINA
          ===================================================== -->
@@ -794,25 +662,34 @@ $conceptoActual = $conceptosPorNivel[$idNivel];
     </footer>
 
 
-
-    <!-- =====================================================
-         LÓGICA TEMPORAL DEL JUEGO
-
-         En el siguiente paso moveremos esta lógica a un archivo
-         JavaScript independiente.
-         ===================================================== -->
+    <!--
+        PHP envía únicamente los datos que JavaScript necesita
+        para ejecutar la misión seleccionada.
+    -->
 
     <!--
-    PHP envía únicamente los datos que JavaScript necesita
-    para ejecutar la misión seleccionada.
+    PHP envía a JavaScript los datos necesarios
+    para ejecutar y validar la misión actual.
 -->
 <script>
     const nivelActual = <?= $leccionActual->getId() ?>;
+
     const pasosRequeridos = <?= $leccionActual->getPasos() ?>;
+
+    const solucionCorrecta = <?= json_encode(
+        $solucionActual['pasosCorrectos'],
+        JSON_UNESCAPED_UNICODE
+    ) ?>;
+
+    const distractores = <?= json_encode(
+        $solucionActual['distractores'],
+        JSON_UNESCAPED_UNICODE
+    ) ?>;
 </script>
 
 <!-- Lógica principal de las misiones -->
 <script src="public/js/juego.js"></script>
+   
 
 </body>
 

@@ -130,10 +130,98 @@ function reiniciar() {
     }
 }
 
+/*
+ * Ejecuta el resultado visual de una misión completada.
+ *
+ * La validación es común para todos los niveles,
+ * pero cada misión puede tener su propia animación
+ * y mensaje de éxito.
+ */
+function mostrarMisionCompletada(consola) {
+
+    // Resultado del nivel 1: Cohete Espacial.
+    if (nivelActual === 1) {
+
+        consola.innerHTML = `
+            > ⛽ Combustible cargado...<br>
+            > 👨‍🚀 Cinturón listo...<br>
+            > 🔥 Motores encendidos...<br>
+
+            <span class="text-emerald-400 font-bold">
+                > 🚀 ¡DESPEGUE EXITOSO!
+                ¡NIVEL COMPLETADO!
+            </span>
+        `;
+
+        document
+            .getElementById('humo')
+            .classList
+            .remove('hidden');
+
+        setTimeout(() => {
+
+            document
+                .getElementById('cohete')
+                .style
+                .transform = 'translateY(-120px)';
+
+        }, 400);
+    }
+
+
+    // Resultado del nivel 2: Robot Explorador.
+    else if (nivelActual === 2) {
+
+        consola.innerHTML = `
+            > 🔁 Ejecutando Bucle (3 repeticiones)...<br>
+            > 💎 Recolectando gemas...<br>
+
+            <span class="text-emerald-400 font-bold">
+                > 🎒 ¡GEMAS GUARDADAS!
+                ¡BUCLE EXITOSO!
+            </span>
+        `;
+
+        document
+            .getElementById('robot')
+            .style
+            .transform = 'translateX(50px)';
+
+        setTimeout(() => {
+
+            document
+                .getElementById('gemas')
+                .innerHTML = '🎒 (En mochila)';
+
+        }, 600);
+    }
+
+
+    // Resultado del nivel 3: Puerta Secreta.
+    else if (nivelActual === 3) {
+
+        consola.innerHTML = `
+            > 🔑 Evaluando:
+            ¿Llave es Dorada? -> VERDADERO<br>
+
+            <span class="text-emerald-400 font-bold">
+                > 🔓 ¡LA PUERTA SE HA ABIERTO!
+                ¡RETO SUPERADO!
+            </span>
+        `;
+
+        document
+            .getElementById('puerta')
+            .innerHTML = '🚪✨🔓';
+    }
+}
 
 /*
  * Ejecuta y valida la secuencia construida por el jugador.
- * Cada nivel tiene actualmente sus propias reglas.
+ *
+ * La solución correcta ya no está escrita directamente
+ * dentro de cada nivel. Ahora llega desde PHP utilizando
+ * la configuración guardada en soluciones.php.
  */
 function ejecutarAlgoritmo() {
 
@@ -141,7 +229,10 @@ function ejecutarAlgoritmo() {
         document.getElementById('consola');
 
 
-    // La misión necesita exactamente la cantidad de pasos indicada.
+    /*
+     * Antes de validar la solución comprobamos que el jugador
+     * haya agregado todos los pasos necesarios.
+     */
     if (secuencia.length < pasosRequeridos) {
 
         consola.innerHTML = `
@@ -155,8 +246,37 @@ function ejecutarAlgoritmo() {
     }
 
 
+    /*
+     * Extraemos únicamente los identificadores de los bloques
+     * seleccionados por el jugador.
+     */
     const ids =
         secuencia.map(comando => comando.id);
+
+
+    /*
+     * Comparamos automáticamente la secuencia del jugador
+     * con la solución recibida desde PHP.
+     *
+     * Si todos los bloques están en la posición correcta,
+     * la misión se considera resuelta.
+     */
+    const esCorrecto =
+        ids.length === solucionCorrecta.length &&
+        ids.every(
+            (id, indice) =>
+                id === solucionCorrecta[indice]
+        );
+
+
+    /*
+     * Comprobamos si el jugador utilizó alguno
+     * de los bloques distractores de la misión.
+     */
+    const tieneDistractor =
+        ids.some(
+            id => distractores.includes(id)
+        );
 
 
     // =========================================================
@@ -165,10 +285,12 @@ function ejecutarAlgoritmo() {
 
     if (nivelActual === 1) {
 
-        if (
-            ids.includes('dist1') ||
-            ids.includes('dist2')
-        ) {
+        /*
+         * Ya no necesitamos comprobar dist1 y dist2
+         * manualmente porque soluciones.php nos indica
+         * cuáles son los distractores.
+         */
+        if (tieneDistractor) {
 
             consola.innerHTML = `
                 <span class="text-rose-400">
@@ -181,19 +303,18 @@ function ejecutarAlgoritmo() {
         }
 
 
-        const esCorrecto =
-            ids[0] === 'paso1' &&
-            ids[1] === 'paso2' &&
-            ids[2] === 'paso3' &&
-            ids[3] === 'paso4';
-
-
+        /*
+         * esCorrecto ya fue calculado de forma genérica.
+         * Aquí solamente mostramos el resultado específico
+         * de esta misión.
+         */
         if (esCorrecto) {
 
             consola.innerHTML = `
                 > ⛽ Combustible cargado...<br>
                 > 👨‍🚀 Cinturón listo...<br>
                 > 🔥 Motores encendidos...<br>
+
                 <span class="text-emerald-400 font-bold">
                     > 🚀 ¡DESPEGUE EXITOSO!
                     ¡NIVEL COMPLETADO!
@@ -235,10 +356,11 @@ function ejecutarAlgoritmo() {
 
     else if (nivelActual === 2) {
 
-        if (
-            ids.includes('dist_robot1') ||
-            ids.includes('dist_robot2')
-        ) {
+        /*
+         * Los distractores del robot también llegan
+         * desde soluciones.php.
+         */
+        if (tieneDistractor) {
 
             consola.innerHTML = `
                 <span class="text-rose-400">
@@ -252,18 +374,12 @@ function ejecutarAlgoritmo() {
         }
 
 
-        const esCorrecto =
-            ids[0] === 'bucle_inicio' &&
-            ids[1] === 'bucle_avanzar' &&
-            ids[2] === 'bucle_gema' &&
-            ids[3] === 'bucle_mochila';
-
-
         if (esCorrecto) {
 
             consola.innerHTML = `
                 > 🔁 Ejecutando Bucle (3 repeticiones)...<br>
                 > 💎 Recolectando gemas...<br>
+
                 <span class="text-emerald-400 font-bold">
                     > 🎒 ¡GEMAS GUARDADAS!
                     ¡BUCLE EXITOSO!
@@ -304,10 +420,11 @@ function ejecutarAlgoritmo() {
 
     else if (nivelActual === 3) {
 
-        if (
-            ids.includes('if_dragon') ||
-            ids.includes('if_trampa')
-        ) {
+        /*
+         * Igual que en los niveles anteriores,
+         * utilizamos la lista general de distractores.
+         */
+        if (tieneDistractor) {
 
             consola.innerHTML = `
                 <span class="text-rose-400">
@@ -318,11 +435,6 @@ function ejecutarAlgoritmo() {
 
             return;
         }
-
-
-        const esCorrecto =
-            ids[0] === 'if_dorada' &&
-            ids[1] === 'then_abrir';
 
 
         if (esCorrecto) {
